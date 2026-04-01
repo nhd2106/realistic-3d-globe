@@ -3,22 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Realistic 3D Globe</title>
+    <title>iPhone 15 Pro Max 3D</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         margin: 0;
-        overflow: hidden;
       }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100">
+  <body class="min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
     <main class="relative h-screen w-screen">
-      <div id="globe" class="h-full w-full"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#1f2937_0%,#0a0a0a_55%)]"></div>
+      <div id="scene" class="relative h-full w-full"></div>
 
-      <div class="pointer-events-none absolute left-4 top-4 rounded-lg bg-slate-900/70 px-3 py-2 backdrop-blur-sm">
-        <p class="text-xs font-medium tracking-wide text-slate-300">Realistic Earth</p>
-        <p class="text-[11px] text-slate-400">Drag to rotate · Scroll to zoom</p>
+      <div class="pointer-events-none absolute left-4 top-4 rounded-xl border border-white/10 bg-black/30 px-4 py-3 backdrop-blur">
+        <p class="text-xs uppercase tracking-[0.24em] text-neutral-300">3D Showcase</p>
+        <h1 class="mt-1 text-sm font-semibold text-white">iPhone 15 Pro Max</h1>
+        <p class="mt-1 text-xs text-neutral-400">Drag to orbit - Scroll to zoom</p>
       </div>
     </main>
 
@@ -26,86 +27,163 @@
       import * as THREE from "https://esm.sh/three@0.164.1";
       import { OrbitControls } from "https://esm.sh/three@0.164.1/examples/jsm/controls/OrbitControls.js";
 
-      const container = document.getElementById("globe");
+      const mount = document.getElementById("scene");
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x020617);
 
       const camera = new THREE.PerspectiveCamera(
-        50,
+        35,
         window.innerWidth / window.innerHeight,
         0.1,
-        2000,
+        100,
       );
-      camera.position.set(0, 0, 4);
+      camera.position.set(0.3, 0.1, 5.4);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
-      container.appendChild(renderer.domElement);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      mount.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.enablePan = false;
-      controls.minDistance = 2.5;
+      controls.minDistance = 3.3;
       controls.maxDistance = 8;
+      controls.maxPolarAngle = Math.PI * 0.62;
+      controls.minPolarAngle = Math.PI * 0.38;
 
-      const loader = new THREE.TextureLoader();
+      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambient);
 
-      const earth = new THREE.Mesh(
-        new THREE.SphereGeometry(1, 96, 96),
-        new THREE.MeshPhongMaterial({
-          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_atmos_2048.jpg"),
-          bumpMap: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_bump_2048.jpg"),
-          bumpScale: 0.03,
-          specularMap: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_specular_2048.jpg"),
-          specular: new THREE.Color(0x1f2937),
-          shininess: 12,
+      const key = new THREE.DirectionalLight(0xffffff, 1.6);
+      key.position.set(4, 5, 6);
+      scene.add(key);
+
+      const rim = new THREE.DirectionalLight(0x93c5fd, 1.1);
+      rim.position.set(-5, -1.2, -5);
+      scene.add(rim);
+
+      const fill = new THREE.RectAreaLight(0xffffff, 8, 4, 6);
+      fill.position.set(0, 0.2, 4.8);
+      scene.add(fill);
+
+      const phoneGroup = new THREE.Group();
+      scene.add(phoneGroup);
+
+      const bodyGeometry = new THREE.BoxGeometry(1.68, 3.65, 0.18, 8, 8, 8);
+      const bodyMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x70757c,
+        metalness: 1,
+        roughness: 0.23,
+        clearcoat: 1,
+        clearcoatRoughness: 0.09,
+      });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      phoneGroup.add(body);
+
+      const display = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.52, 3.43),
+        new THREE.MeshPhysicalMaterial({
+          color: 0x0a0a0a,
+          metalness: 0,
+          roughness: 0.1,
+          transmission: 0,
+          clearcoat: 1,
+          clearcoatRoughness: 0.02,
         }),
       );
-      scene.add(earth);
+      display.position.z = 0.092;
+      phoneGroup.add(display);
 
-      const clouds = new THREE.Mesh(
-        new THREE.SphereGeometry(1.01, 96, 96),
-        new THREE.MeshPhongMaterial({
-          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_clouds_1024.png"),
-          transparent: true,
-          opacity: 0.5,
-          depthWrite: false,
+      const wallpaper = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.42, 3.22),
+        new THREE.MeshBasicMaterial({ color: 0x15233e }),
+      );
+      wallpaper.position.z = 0.094;
+      phoneGroup.add(wallpaper);
+
+      const island = new THREE.Mesh(
+        new THREE.CapsuleGeometry(0.09, 0.21, 8, 16),
+        new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.5 }),
+      );
+      island.rotation.z = Math.PI / 2;
+      island.position.set(0, 1.42, 0.096);
+      phoneGroup.add(island);
+
+      const cameraPlate = new THREE.Mesh(
+        new THREE.BoxGeometry(0.92, 0.92, 0.1),
+        new THREE.MeshPhysicalMaterial({
+          color: 0x7a8087,
+          metalness: 1,
+          roughness: 0.2,
+          clearcoat: 1,
         }),
       );
-      scene.add(clouds);
+      cameraPlate.position.set(-0.35, 1.22, -0.14);
+      phoneGroup.add(cameraPlate);
 
-      const atmosphere = new THREE.Mesh(
-        new THREE.SphereGeometry(1.07, 96, 96),
-        new THREE.MeshBasicMaterial({
-          color: 0x60a5fa,
-          transparent: true,
-          opacity: 0.12,
-          side: THREE.BackSide,
-        }),
+      const lensMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x0f172a,
+        roughness: 0.08,
+        metalness: 0.2,
+        transmission: 0.2,
+        clearcoat: 1,
+      });
+
+      const lensRingMaterial = new THREE.MeshStandardMaterial({
+        color: 0xb9bdc2,
+        roughness: 0.2,
+        metalness: 1,
+      });
+
+      const lensPositions = [
+        [-0.58, 1.47, -0.1],
+        [-0.2, 1.16, -0.1],
+        [-0.58, 0.85, -0.1],
+      ];
+
+      for (const [x, y, z] of lensPositions) {
+        const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.145, 0.04, 40), lensRingMaterial);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(x, y, z);
+        phoneGroup.add(ring);
+
+        const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.05, 40), lensMaterial);
+        lens.rotation.x = Math.PI / 2;
+        lens.position.set(x, y, z + 0.01);
+        phoneGroup.add(lens);
+      }
+
+      const flash = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.06, 0.02, 24),
+        new THREE.MeshStandardMaterial({ color: 0xfff2cc, emissive: 0x332200, emissiveIntensity: 0.22 }),
       );
-      scene.add(atmosphere);
+      flash.rotation.x = Math.PI / 2;
+      flash.position.set(-0.22, 1.48, -0.09);
+      phoneGroup.add(flash);
 
-      const stars = new THREE.Mesh(
-        new THREE.SphereGeometry(80, 64, 64),
-        new THREE.MeshBasicMaterial({
-          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/starfield.jpg"),
-          side: THREE.BackSide,
-        }),
+      const lidar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, 0.02, 24),
+        new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.4 }),
       );
-      scene.add(stars);
+      lidar.rotation.x = Math.PI / 2;
+      lidar.position.set(-0.2, 0.85, -0.09);
+      phoneGroup.add(lidar);
 
-      const ambientLight = new THREE.AmbientLight(0x506080, 0.6);
-      scene.add(ambientLight);
+      phoneGroup.rotation.set(-0.14, 0.58, 0.02);
 
-      const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-      sunLight.position.set(5, 2, 5);
-      scene.add(sunLight);
+      const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(1.5, 64),
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 }),
+      );
+      shadow.rotation.x = -Math.PI / 2;
+      shadow.position.y = -2.1;
+      shadow.position.z = 0.2;
+      scene.add(shadow);
 
       function animate() {
         requestAnimationFrame(animate);
-        earth.rotation.y += 0.0008;
-        clouds.rotation.y += 0.001;
+        phoneGroup.rotation.y += 0.0015;
         controls.update();
         renderer.render(scene, camera);
       }
