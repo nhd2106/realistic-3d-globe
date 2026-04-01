@@ -23,8 +23,8 @@
     </main>
 
     <script type="module">
-      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
-      import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/controls/OrbitControls.js";
+      import * as THREE from "https://esm.sh/three@0.164.1";
+      import { OrbitControls } from "https://esm.sh/three@0.164.1/examples/jsm/controls/OrbitControls.js";
 
       const container = document.getElementById("globe");
       const scene = new THREE.Scene();
@@ -54,10 +54,10 @@
       const earth = new THREE.Mesh(
         new THREE.SphereGeometry(1, 96, 96),
         new THREE.MeshPhongMaterial({
-          map: loader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"),
-          bumpMap: loader.load("https://threejs.org/examples/textures/planets/earth_bump_2048.jpg"),
+          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_atmos_2048.jpg"),
+          bumpMap: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_bump_2048.jpg"),
           bumpScale: 0.03,
-          specularMap: loader.load("https://threejs.org/examples/textures/planets/earth_specular_2048.jpg"),
+          specularMap: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_specular_2048.jpg"),
           specular: new THREE.Color(0x1f2937),
           shininess: 12,
         }),
@@ -67,7 +67,7 @@
       const clouds = new THREE.Mesh(
         new THREE.SphereGeometry(1.01, 96, 96),
         new THREE.MeshPhongMaterial({
-          map: loader.load("https://threejs.org/examples/textures/planets/earth_clouds_1024.png"),
+          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/earth_clouds_1024.png"),
           transparent: true,
           opacity: 0.5,
           depthWrite: false,
@@ -89,7 +89,7 @@
       const stars = new THREE.Mesh(
         new THREE.SphereGeometry(80, 64, 64),
         new THREE.MeshBasicMaterial({
-          map: loader.load("https://threejs.org/examples/textures/planets/starfield.jpg"),
+          map: loader.load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r164/examples/textures/planets/starfield.jpg"),
           side: THREE.BackSide,
         }),
       );
