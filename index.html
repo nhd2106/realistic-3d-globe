@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realistic 3D Globe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <main class="relative h-screen w-screen">
+      <div id="globe" class="h-full w-full"></div>
+
+      <div class="pointer-events-none absolute left-4 top-4 rounded-lg bg-slate-900/70 px-3 py-2 backdrop-blur-sm">
+        <p class="text-xs font-medium tracking-wide text-slate-300">Realistic Earth</p>
+        <p class="text-[11px] text-slate-400">Drag to rotate · Scroll to zoom</p>
+      </div>
+    </main>
+
+    <script type="module">
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
+      import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/controls/OrbitControls.js";
+
+      const container = document.getElementById("globe");
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x020617);
+
+      const camera = new THREE.PerspectiveCamera(
+        50,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        2000,
+      );
+      camera.position.set(0, 0, 4);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      container.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = 2.5;
+      controls.maxDistance = 8;
+
+      const loader = new THREE.TextureLoader();
+
+      const earth = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 96, 96),
+        new THREE.MeshPhongMaterial({
+          map: loader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"),
+          bumpMap: loader.load("https://threejs.org/examples/textures/planets/earth_bump_2048.jpg"),
+          bumpScale: 0.03,
+          specularMap: loader.load("https://threejs.org/examples/textures/planets/earth_specular_2048.jpg"),
+          specular: new THREE.Color(0x1f2937),
+          shininess: 12,
+        }),
+      );
+      scene.add(earth);
+
+      const clouds = new THREE.Mesh(
+        new THREE.SphereGeometry(1.01, 96, 96),
+        new THREE.MeshPhongMaterial({
+          map: loader.load("https://threejs.org/examples/textures/planets/earth_clouds_1024.png"),
+          transparent: true,
+          opacity: 0.5,
+          depthWrite: false,
+        }),
+      );
+      scene.add(clouds);
+
+      const atmosphere = new THREE.Mesh(
+        new THREE.SphereGeometry(1.07, 96, 96),
+        new THREE.MeshBasicMaterial({
+          color: 0x60a5fa,
+          transparent: true,
+          opacity: 0.12,
+          side: THREE.BackSide,
+        }),
+      );
+      scene.add(atmosphere);
+
+      const stars = new THREE.Mesh(
+        new THREE.SphereGeometry(80, 64, 64),
+        new THREE.MeshBasicMaterial({
+          map: loader.load("https://threejs.org/examples/textures/planets/starfield.jpg"),
+          side: THREE.BackSide,
+        }),
+      );
+      scene.add(stars);
+
+      const ambientLight = new THREE.AmbientLight(0x506080, 0.6);
+      scene.add(ambientLight);
+
+      const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      sunLight.position.set(5, 2, 5);
+      scene.add(sunLight);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        earth.rotation.y += 0.0008;
+        clouds.rotation.y += 0.001;
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
