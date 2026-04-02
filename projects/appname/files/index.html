@@ -3,139 +3,248 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simple Realistic 3D Globe</title>
+    <title>Axiom 65 - 3D Mechanical Keyboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@500;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="min-h-screen bg-slate-950 text-slate-100">
-    <div class="relative h-screen w-full overflow-hidden">
-      <canvas id="globeCanvas" class="absolute inset-0 h-full w-full"></canvas>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Sora", "sans-serif"],
+              body: ["Space Grotesk", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
 
-      <div class="pointer-events-none absolute inset-0 flex items-start justify-center pt-8">
-        <div class="rounded-xl border border-slate-700/60 bg-slate-900/50 px-4 py-2 backdrop-blur">
-          <h1 class="text-sm font-semibold tracking-wide text-slate-100 md:text-base">Realistic 3D Globe</h1>
-          <p class="text-xs text-slate-300">Drag to rotate, scroll to zoom</p>
+      body {
+        margin: 0;
+      }
+
+      .bg-noise {
+        position: absolute;
+        inset: 0;
+        opacity: 0.12;
+        background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.46) 1px, transparent 0);
+        background-size: 24px 24px;
+        mix-blend-mode: soft-light;
+      }
+
+      .fade-up {
+        animation: fade-up 0.9s ease both;
+      }
+
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen overflow-hidden bg-[#050912] font-body text-[#e6edf7]">
+    <main class="relative h-screen w-screen">
+      <div class="absolute inset-0 bg-[radial-gradient(120%_90%_at_8%_0%,#103f66_0%,#050912_48%),radial-gradient(90%_100%_at_100%_90%,#3c122f_0%,rgba(60,18,47,0)_55%)]"></div>
+      <div class="bg-noise"></div>
+      <div id="scene" class="relative h-full w-full"></div>
+
+      <section class="pointer-events-none absolute inset-x-0 top-0 mx-auto flex max-w-6xl flex-col justify-between gap-4 p-4 md:flex-row md:p-8">
+        <div class="fade-up max-w-md rounded-2xl border border-white/10 bg-[#07111fcc] p-4 backdrop-blur-xl md:p-6">
+          <p class="text-xs uppercase tracking-[0.24em] text-cyan-200/80">3D Keyboard Lab</p>
+          <h1 class="mt-3 font-display text-3xl leading-tight text-white md:text-4xl">Axiom 65 Mechanical Keyboard</h1>
+          <p class="mt-3 text-sm text-slate-300 md:text-base">Interactive concept built with TailwindCSS + Three.js featuring floating keycaps, machined case lighting, and RGB underglow.</p>
+          <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-200">
+            <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1">Gasket Mount</span>
+            <span class="rounded-full border border-pink-300/30 bg-pink-300/10 px-3 py-1">Hot-swap PCB</span>
+            <span class="rounded-full border border-violet-300/30 bg-violet-300/10 px-3 py-1">QMK/VIA</span>
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div class="fade-up rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-xs leading-relaxed text-slate-300 backdrop-blur-md [animation-delay:150ms] md:text-right">
+          <p class="uppercase tracking-[0.2em] text-slate-200">Controls</p>
+          <p class="mt-1">Drag: Orbit</p>
+          <p>Wheel/Pinch: Zoom</p>
+          <p class="mt-1 text-cyan-200">Auto demo enabled</p>
+        </div>
+      </section>
+    </main>
 
     <script type="module">
-      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164/build/three.module.js";
-      import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164/examples/jsm/controls/OrbitControls.js";
+      import * as THREE from "https://esm.sh/three@0.164.1";
+      import { OrbitControls } from "https://esm.sh/three@0.164.1/examples/jsm/controls/OrbitControls.js";
 
-      const canvas = document.getElementById("globeCanvas");
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      const mount = document.getElementById("scene");
+      const scene = new THREE.Scene();
+
+      const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 5.4, 8.6);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
-
-      const scene = new THREE.Scene();
-
-      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 0.2, 4.2);
+      mount.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.minDistance = 2.2;
-      controls.maxDistance = 7;
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.35;
+      controls.enablePan = false;
+      controls.minDistance = 5;
+      controls.maxDistance = 13;
+      controls.minPolarAngle = 0.6;
+      controls.maxPolarAngle = Math.PI * 0.49;
 
-      scene.add(new THREE.AmbientLight(0x4f6a93, 0.32));
+      scene.add(new THREE.AmbientLight(0x9fb3ff, 0.72));
 
-      const sun = new THREE.DirectionalLight(0xffffff, 1.7);
-      sun.position.set(6, 3, 5);
-      scene.add(sun);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.45);
+      keyLight.position.set(7, 10, 6);
+      scene.add(keyLight);
 
-      const rim = new THREE.DirectionalLight(0x6ea4ff, 0.55);
-      rim.position.set(-6, -1, -4);
-      scene.add(rim);
+      const rimLight = new THREE.DirectionalLight(0x67e8f9, 0.85);
+      rimLight.position.set(-8, 4, -7);
+      scene.add(rimLight);
 
-      const loader = new THREE.TextureLoader();
-      const earthMap = loader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg");
-      const normalMap = loader.load("https://threejs.org/examples/textures/planets/earth_normal_2048.jpg");
-      const specularMap = loader.load("https://threejs.org/examples/textures/planets/earth_specular_2048.jpg");
-      const cloudMap = loader.load("https://threejs.org/examples/textures/planets/earth_clouds_1024.png");
-      const starsMap = loader.load("https://threejs.org/examples/textures/planets/galaxy_starfield.png");
+      const fillLight = new THREE.PointLight(0xf472b6, 1.3, 20, 1.8);
+      fillLight.position.set(0, 1.4, 0.8);
+      scene.add(fillLight);
 
-      const globe = new THREE.Mesh(
-        new THREE.SphereGeometry(1.45, 128, 128),
-        new THREE.MeshStandardMaterial({
-          map: earthMap,
-          normalMap,
-          roughness: 0.85,
-          metalness: 0.05,
-          specularMap,
+      const keyboard = new THREE.Group();
+      scene.add(keyboard);
+
+      const chassis = new THREE.Mesh(
+        new THREE.BoxGeometry(8, 0.7, 3.2),
+        new THREE.MeshPhysicalMaterial({
+          color: 0x1a1d25,
+          metalness: 0.92,
+          roughness: 0.3,
+          clearcoat: 0.9,
+          clearcoatRoughness: 0.15,
         }),
       );
-      scene.add(globe);
+      chassis.position.y = -0.12;
+      keyboard.add(chassis);
 
-      const clouds = new THREE.Mesh(
-        new THREE.SphereGeometry(1.465, 128, 128),
-        new THREE.MeshPhongMaterial({
-          map: cloudMap,
-          transparent: true,
-          opacity: 0.34,
-          depthWrite: false,
-        }),
+      const topPlate = new THREE.Mesh(
+        new THREE.BoxGeometry(7.65, 0.26, 2.95),
+        new THREE.MeshStandardMaterial({ color: 0x262b36, metalness: 0.8, roughness: 0.35 }),
       );
-      scene.add(clouds);
+      topPlate.position.y = 0.3;
+      keyboard.add(topPlate);
 
-      const atmosphere = new THREE.Mesh(
-        new THREE.SphereGeometry(1.52, 128, 128),
-        new THREE.ShaderMaterial({
-          vertexShader: `
-            varying vec3 vNormal;
-            void main() {
-              vNormal = normalize(normalMatrix * normal);
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-          `,
-          fragmentShader: `
-            varying vec3 vNormal;
-            void main() {
-              float i = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-              gl_FragColor = vec4(0.42, 0.66, 1.0, 1.0) * i;
-            }
-          `,
-          side: THREE.BackSide,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-        }),
+      const keyColors = [0xdbe7ff, 0xc3d2f7, 0xa8c8ff, 0xffd3f2];
+      const keyRows = ["1234567890-=", "QWERTYUIOP[]", "ASDFGHJKL;\"", "ZXCVBNM,./"];
+      const keycaps = [];
+
+      const unit = 0.52;
+      const keyGap = 0.08;
+      const rowDepth = 0.62;
+      const zStart = -1.1;
+
+      keyRows.forEach((row, rowIndex) => {
+        const rowOffset = rowIndex === 1 ? 0.18 : rowIndex === 2 ? 0.34 : rowIndex === 3 ? 0.58 : 0;
+        const totalWidth = row.length * unit + (row.length - 1) * keyGap;
+        const xStart = -totalWidth / 2 + unit / 2 + rowOffset;
+
+        [...row].forEach((char, keyIndex) => {
+          const cap = new THREE.Mesh(
+            new THREE.BoxGeometry(unit, 0.3, rowDepth),
+            new THREE.MeshPhysicalMaterial({
+              color: keyColors[(rowIndex + keyIndex) % keyColors.length],
+              roughness: 0.5,
+              metalness: 0.05,
+              clearcoat: 0.7,
+              clearcoatRoughness: 0.3,
+            }),
+          );
+
+          cap.position.set(xStart + keyIndex * (unit + keyGap), 0.6, zStart + rowIndex * 0.72);
+          cap.userData = { baseY: cap.position.y, phase: Math.random() * Math.PI * 2, legend: char };
+          keyboard.add(cap);
+          keycaps.push(cap);
+        });
+      });
+
+      const spaceBar = new THREE.Mesh(
+        new THREE.BoxGeometry(3.4, 0.3, 0.62),
+        new THREE.MeshPhysicalMaterial({ color: 0xe3e8f8, roughness: 0.52, clearcoat: 0.8 }),
       );
-      scene.add(atmosphere);
+      spaceBar.position.set(0.42, 0.6, 1.45);
+      spaceBar.userData = { baseY: spaceBar.position.y, phase: 0.2, legend: "SPACE" };
+      keyboard.add(spaceBar);
+      keycaps.push(spaceBar);
 
-      const stars = new THREE.Mesh(
-        new THREE.SphereGeometry(45, 64, 64),
-        new THREE.MeshBasicMaterial({ map: starsMap, side: THREE.BackSide }),
+      const knob = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.33, 0.33, 0.2, 40),
+        new THREE.MeshStandardMaterial({ color: 0x5cc8ff, metalness: 0.6, roughness: 0.25 }),
       );
-      scene.add(stars);
+      knob.position.set(3.35, 0.7, -1.08);
+      knob.rotation.x = Math.PI / 2;
+      keyboard.add(knob);
 
-      function resize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      }
+      const underGlow = new THREE.Mesh(
+        new THREE.BoxGeometry(8.08, 0.06, 3.28),
+        new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.32 }),
+      );
+      underGlow.position.set(0, -0.47, 0);
+      keyboard.add(underGlow);
 
-      window.addEventListener("resize", resize);
+      const floor = new THREE.Mesh(
+        new THREE.CircleGeometry(10, 72),
+        new THREE.MeshStandardMaterial({ color: 0x04070f, roughness: 0.95, metalness: 0 }),
+      );
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -1.3;
+      scene.add(floor);
+
+      const glowPool = new THREE.Mesh(
+        new THREE.CircleGeometry(4.5, 64),
+        new THREE.MeshBasicMaterial({ color: 0x2dd4bf, transparent: true, opacity: 0.2 }),
+      );
+      glowPool.rotation.x = -Math.PI / 2;
+      glowPool.position.y = -1.25;
+      scene.add(glowPool);
+
+      keyboard.rotation.set(-0.26, -0.4, -0.04);
+      keyboard.position.y = -0.08;
 
       const clock = new THREE.Clock();
-      function animate() {
-        requestAnimationFrame(animate);
-        const dt = clock.getDelta();
 
-        globe.rotation.y += dt * 0.08;
-        clouds.rotation.y += dt * 0.11;
-        stars.rotation.y += dt * 0.002;
+      function animate() {
+        const t = clock.getElapsedTime();
+
+        keyboard.rotation.y += 0.0016;
+        knob.rotation.z = t * 0.85;
+        underGlow.material.opacity = 0.2 + Math.sin(t * 1.9) * 0.1;
+        underGlow.material.color.setHSL(0.52 + Math.sin(t * 0.6) * 0.08, 0.88, 0.6);
+
+        keycaps.forEach((cap, index) => {
+          const pulse = Math.sin(t * 2.2 + cap.userData.phase + index * 0.06) * 0.022;
+          cap.position.y = cap.userData.baseY + pulse;
+        });
 
         controls.update();
         renderer.render(scene, camera);
+        requestAnimationFrame(animate);
       }
 
       animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     </script>
   </body>
 </html>
